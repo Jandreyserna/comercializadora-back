@@ -14,6 +14,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('get-type-identity/identity-type',[RegisterController::class, 'identityTypes']);
 
 // Ruta de prueba para verificar que el servidor está funcionando
-Route::get('/', function () {
-    return response()->json(['message' => 'API is working']);
-});
+Route::post('register/submit-form', [RegisterController::class, 'registerUser']);

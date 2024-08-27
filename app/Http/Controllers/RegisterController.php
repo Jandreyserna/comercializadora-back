@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\RegisterModel;
+use DateTime;
 
 class RegisterController extends Controller
 {
@@ -26,9 +27,9 @@ class RegisterController extends Controller
 
             $completeUserData = array_merge($userData, $this->mapUserData($data));
 
-            $userState = $this->registerModel->insertUser($completeUserData);
+            $userState = $this->registerModel->insertCustomer($completeUserData);
 
-            return response()->json(['success' => true, 'data' => $completeUserData['user_id']]);
+            return response()->json(['success' => true, 'message' => 'Usuario registrado correctamente']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Error al registrar el usuario', 'error' => $e->getMessage()]);
         }
@@ -38,7 +39,7 @@ class RegisterController extends Controller
     {
         $countUsers = $this->registerModel->countIdUser();
         return [
-            'user_id' => $countUsers + 1,
+            'customer_id' => $countUsers + 1,
             'created_at' => now()
         ];
     }
@@ -50,20 +51,28 @@ class RegisterController extends Controller
     }
 
 
+    protected function calculateAge($birthDate)
+    {
+        $birthDate = new DateTime($birthDate);
+        $currentDate = new DateTime();
+        $age = $currentDate->diff($birthDate)->y;
+        return $age;
+    }
+
 
     protected function mapUserData($data)
     {
         return [
             'id_type' => $data['idType'],
-            'id_identity' => $data['identification'],
+            'identity' => $data['identification'],
             'name' => $data['firstName'],
             'last_name' => $data['lastName'],
             'genero' => $data['genero'],
             'city' => $data['city'],
             'phone_number' => intval($data['phoneNumber']),
             'birth_date' => $data['birthDate'],
+            'age' => $this->calculateAge($data['birthDate']),
             'email' => $data['email'],
-            'password' => $data['identification']
         ];
     }
 
@@ -71,6 +80,7 @@ class RegisterController extends Controller
     {
         try {
             $identityType = $this->registerModel->getIdentityType();
+            /* dd ($identityType[0]); */
             return response()->json(['success' => true, 'data' => $identityType]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Error al obtener los tipos de identidad', 'error' => $e->getMessage()]);
